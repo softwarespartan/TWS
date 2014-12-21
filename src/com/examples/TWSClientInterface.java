@@ -3,6 +3,7 @@ package com.examples;
 import com.ib.client.*;
 
 public class TWSClientInterface implements EWrapper{
+
     @Override
     public void tickPrice(int tickerId, int field, double price, int canAutoExecute) {
         System.out.println("TWSClientInterface:tickPrice -- "+tickerId+" "+field+":"+TickType.getField(field)+" "+price);
@@ -76,6 +77,24 @@ public class TWSClientInterface implements EWrapper{
     @Override
     public void contractDetails(int reqId, ContractDetails contractDetails) {
 
+        String msg = "marketName = "   + contractDetails.m_marketName     + "\n"
+                + "minTick = "         + contractDetails.m_minTick        + "\n"
+                + "price magnifier = " + contractDetails.m_priceMagnifier + "\n"
+                + "orderTypes = "      + contractDetails.m_orderTypes     + "\n"
+                + "validExchanges = "  + contractDetails.m_validExchanges + "\n"
+                + "underConId = "      + contractDetails.m_underConId     + "\n"
+                + "longName = "        + contractDetails.m_longName       + "\n"
+                + "contractMonth = "   + contractDetails.m_contractMonth  + "\n"
+                + "industry = "        + contractDetails.m_industry       + "\n"
+                + "category = "        + contractDetails.m_category       + "\n"
+                + "subcategory = "     + contractDetails.m_subcategory    + "\n"
+                + "timeZoneId = "      + contractDetails.m_timeZoneId     + "\n"
+                + "tradingHours = "    + contractDetails.m_tradingHours   + "\n"
+                + "liquidHours = "     + contractDetails.m_liquidHours    + "\n"
+                + "evRule = "          + contractDetails.m_evRule         + "\n"
+                + "evMultiplier = "    + contractDetails.m_evMultiplier   + "\n";
+        System.out.println(msg);
+
     }
 
     @Override
@@ -83,9 +102,10 @@ public class TWSClientInterface implements EWrapper{
 
     }
 
+
     @Override
     public void contractDetailsEnd(int reqId) {
-
+        System.out.println("TWSClientInterface:contractDetailEnd was called");
     }
 
     @Override
