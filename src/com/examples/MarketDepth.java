@@ -17,7 +17,7 @@ public class MarketDepth {
         Contract contract = ContractFactory.GenericStockContract("SPY");
 
         // set the exchange
-        contract.m_exchange = "ARCA";  contract.m_primaryExch = "ARCA";
+        contract.m_exchange = "ISLAND";  contract.m_primaryExch = "ISLAND";
 
         // request the market depth
         eClientSocket.reqMktDepth(0, contract, 5, null);
