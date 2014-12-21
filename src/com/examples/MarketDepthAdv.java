@@ -6,13 +6,13 @@ import com.tws.ContractFactory;
 import java.util.HashMap;
 import java.util.concurrent.*;
 
-public class MarketDepth {
+public class MarketDepthAdv {
 
     public int reqId = 0;
 
     public final BlockingQueue<ContractDetails> results = new ArrayBlockingQueue<ContractDetails>(1000);
 
-    public final HashMap contractIdMap = new HashMap();
+    public final HashMap<Integer,String> contractIdMap = new HashMap<>();
 
     // create connection object for to communicate with TWS
     public final EClientSocket eClientSocket = new EClientSocket(new EWrapper() {
@@ -297,7 +297,7 @@ public class MarketDepth {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
-        MarketDepth marketDepth = new MarketDepth();
+        MarketDepthAdv marketDepth = new MarketDepthAdv();
 
         // try to connect to TWS
         marketDepth.eClientSocket.eConnect("127.0.0.1", 7496, 0);
