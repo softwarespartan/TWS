@@ -302,49 +302,14 @@ public class MarketDepthAdv {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
+        // init market depth object
         MarketDepthAdv marketDepth = new MarketDepthAdv();
 
         // try to connect to TWS
         marketDepth.eClientSocket.eConnect("127.0.0.1", 7496, 0);
 
-        // initialize a contract for symbols to BUY
-        //Contract contract = ContractFactory.GenericStockContract("FB");
-
-        //"SMART","ISE","CHX","ARCA","ISLAND","VWAP","IBSX","DRCTEDGE","BEX","BATS","EDGEA","LAVA","CSFBALGO","JEFFALGO","BYX","IEX","TPLUS2","PSX"
-
-        // set the exchange
-        //contract.m_exchange = ""; contract.m_primaryExch = "";
-
-        //ContractDetails contractDetails = marketDepth.getContractDetails(contract);
-
-        //if ( contractDetails.m_summary.m_symbol != null)
-        //    System.out.println(com.ib.client.EWrapperMsgGenerator.contractDetails(0,contractDetails));
-
+        // request market depth (level 2) for symbol
+        // note only few exchanges provide L2, ARCA, BATS, ISLAND
         marketDepth.reqMarketDepth("FB",5);
-
-        //marketDepth.executorService.shutdown();
-
-
-
-        // place the order
-        //eClientSocket.reqMktDepth(6352, contract, 10, null);
-
-//        // set the exchange
-//        contract.m_exchange = "ARCA";
-//
-//        // place the order
-//        eClientSocket.reqMktDepth(6353, contract, 10, null);
-//
-//        // set the exchange
-//        contract.m_exchange = "BATS";
-//
-//        // place the order
-//        eClientSocket.reqMktDepth(6354, contract, 10, null);
-//
-//        // set the exchange
-//        contract.m_exchange = "EDGEA";
-//
-//        // place the order
-//        eClientSocket.reqMktDepth(6355, contract, 10, null);
     }
 }

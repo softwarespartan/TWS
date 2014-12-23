@@ -1,6 +1,7 @@
 package com.tws;
 
 import com.ib.client.Contract;
+import com.ib.client.ContractDetails;
 import com.ib.client.TickType;
 
 import java.text.ParseException;
@@ -38,6 +39,12 @@ public class Handler extends EmptyWrapper{
     private final Set<NotificationListener> marketMetadataListeners
             = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
 
+    private final Set<NotificationListener> marketDepthListeners
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+    private final Set<NotificationListener> contractDetailsListeners
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+
 
 
     private final ConcurrentHashMap<Integer,HistoricalDataEvent> historicalDataMap = new ConcurrentHashMap<>();
@@ -52,86 +59,110 @@ public class Handler extends EmptyWrapper{
 
 
 
-    public void addNotificationListener     (NotificationListener listener) {
+    public void addNotificationListener      (NotificationListener listener) {
         System.out.println("notification listener has been added");
         this.notificationListeners.add(listener);
     }
 
-    public void removeNotificationListener  (NotificationListener listener) {
+    public void removeNotificationListener   (NotificationListener listener) {
         System.out.println("notificationlistener has been removed");
         this.notificationListeners.remove(listener);
     }
 
 
 
-    public void addHistoricalDataListener   (NotificationListener listener) {
+    public void addHistoricalDataListener    (NotificationListener listener) {
         System.out.println("historical data listener has been added");
         this.historicalDataListeners.add(listener);
     }
 
-    public void removeHistoricalDataListener(NotificationListener listener) {
+    public void removeHistoricalDataListener (NotificationListener listener) {
         System.out.println("historical data listener has been removed");
         this.historicalDataListeners.remove(listener);
     }
 
 
 
-    public void addRealTimeBarListener      (NotificationListener listener) {
+    public void addRealTimeBarListener       (NotificationListener listener) {
         System.out.println("realtime bar listener has been added");
         this.realTimeBarListeners.add(listener);
     }
 
-    public void removeRealTimeBarListener   (NotificationListener listener) {
+    public void removeRealTimeBarListener    (NotificationListener listener) {
         System.out.println("realtime bar listener has been removed");
         this.realTimeBarListeners.remove(listener);
     }
 
 
 
-    public void addPositionListener         (NotificationListener listener) {
+    public void addPositionListener          (NotificationListener listener) {
         System.out.println("realtime bar listener has been added");
         this.positionListeners.add(listener);
     }
 
-    public void removePositionListener      (NotificationListener listener) {
+    public void removePositionListener       (NotificationListener listener) {
         System.out.println("realtime bar listener has been removed");
         this.positionListeners.remove(listener);
     }
 
 
 
-    public void addAccountSummaryListener   (NotificationListener listener) {
+    public void addAccountSummaryListener    (NotificationListener listener) {
         System.out.println("account summary listener has been added");
         this.accountSummaryListeners.add(listener);
     }
 
-    public void removeAccountSummaryListener(NotificationListener listener) {
+    public void removeAccountSummaryListener (NotificationListener listener) {
         System.out.println("account summary listener has been removed");
         this.accountSummaryListeners.remove(listener);
     }
 
 
 
-    public void addMarketDataListener       (NotificationListener listener) {
+    public void addMarketDataListener        (NotificationListener listener) {
         System.out.println("market data listener has been added");
         this.marketDataListeners.add(listener);
     }
 
-    public void removeMarketDataListener    (NotificationListener listener) {
+    public void removeMarketDataListener     (NotificationListener listener) {
         System.out.println("market data listener has been removed");
         this.marketDataListeners.remove(listener);
     }
 
 
 
-    public void addMarketMetadataListener   (NotificationListener listener) {
+    public void addMarketMetadataListener    (NotificationListener listener) {
         System.out.println("market metadata listener has been added");
         this.marketMetadataListeners.add(listener);
     }
 
-    public void removeMarketMetadataListener(NotificationListener listener) {
+    public void removeMarketMetadataListener (NotificationListener listener) {
         System.out.println("market metadata listener has been removed");
         this.marketMetadataListeners.remove(listener);
+    }
+
+
+
+    public void addMarketDepthListener       (NotificationListener listener) {
+        System.out.println("market depth listener has been added");
+        this.marketDepthListeners.add(listener);
+    }
+
+    public void removeMarketDepthListener    (NotificationListener listener) {
+        System.out.println("market depth listener has been removed");
+        this.marketDepthListeners.remove(listener);
+    }
+
+
+
+    public void addContractDetailsListener   (NotificationListener listener) {
+        System.out.println("market depth listener has been added");
+        this.contractDetailsListeners.add(listener);
+    }
+
+    public void removeContractDetailsListener(NotificationListener listener) {
+        System.out.println("market depth listener has been removed");
+        this.contractDetailsListeners.remove(listener);
     }
 
 
@@ -260,7 +291,7 @@ public class Handler extends EmptyWrapper{
     }
 
     @Override
-    public void positionEnd() {
+    public void positionEnd()                                                        {
 
         // box the request id for hashcode in map
         final Integer integerReqId = new Integer(0);
@@ -281,7 +312,7 @@ public class Handler extends EmptyWrapper{
         System.out.println("NotificationAction for position request has been submitted ...");
     }
 
-    public final class PositionsEvent extends AggregateEvent<Position> {
+    public final class PositionsEvent extends AggregateEvent<Position>               {
         PositionsEvent(Object obj) { super(obj); }
     }
 
@@ -304,7 +335,7 @@ public class Handler extends EmptyWrapper{
     }
 
     @Override
-    public void accountSummaryEnd(int reqId) {
+    public void accountSummaryEnd(int reqId)                                                         {
 
         // box the request id for hashcode in map
         final Integer integerReqId = new Integer(reqId);
@@ -325,7 +356,7 @@ public class Handler extends EmptyWrapper{
         System.out.println("NotificationAction for account summary request has been submitted ...");
     }
 
-    public final class AccountSummaryEvent extends Event<HashMap<String,String>> {
+    public final class AccountSummaryEvent extends Event<HashMap<String,String>>                     {
         public AccountSummaryEvent(Object obj, HashMap<String,String> details) { super(obj,details); }
     }
 
@@ -351,7 +382,7 @@ public class Handler extends EmptyWrapper{
     }
 
     @Override
-    public void tickSize(int reqId, int field, int size) {
+    public void tickSize(int reqId, int field, int size)                          {
 
         // create a UUID for this event
         final UUID uuid = java.util.UUID.randomUUID();
@@ -369,14 +400,14 @@ public class Handler extends EmptyWrapper{
         System.out.println("market data NotificationAction has been submitted");
     }
 
-    public final class MarketDataEvent extends Event<MarketData>{
+    public final class MarketDataEvent extends Event<MarketData>                  {
         public MarketDataEvent(Object source, MarketData data) { super(source, data); }
     }
 
 
 
     @Override
-    public void tickGeneric(int reqId, int tickType, double value) {
+    public void tickGeneric(int reqId, int tickType, double value)      {
 
         // create a UUID for this event
         final UUID uuid = java.util.UUID.randomUUID();
@@ -395,7 +426,7 @@ public class Handler extends EmptyWrapper{
     }
 
     @Override
-    public void tickString(int reqId, int tickType, String value) {
+    public void tickString(int reqId, int tickType, String value)       {
 
         // create a UUID for this event
         final UUID uuid = java.util.UUID.randomUUID();
@@ -415,6 +446,71 @@ public class Handler extends EmptyWrapper{
 
     public final class MarketMetadataEvent extends Event<MarketMetadata>{
         public MarketMetadataEvent(Object source, MarketMetadata data) { super(source, data); }
+    }
+
+
+
+    @Override
+    public void updateMktDepth  (int reqId, int position,                     int operation, int side, double price, int size) {
+
+        // create a UUID for this event
+        final UUID uuid = java.util.UUID.randomUUID();
+
+        // put market data event in the event queue with or without listeners
+        this.eventQueue.put(uuid,new MarketDepthEvent(
+                        this,new MarketDepth(reqId,position,operation,side,price,size)
+                )
+        );
+
+        // notify market depth listeners
+        this.notify(this.marketDepthListeners,new NotificationEvent(this,uuid));
+    }
+
+    @Override
+    public void updateMktDepthL2(int reqId, int position, String marketMaker, int operation, int side, double price, int size) {
+
+        // create a UUID for this event
+        final UUID uuid = java.util.UUID.randomUUID();
+
+        // put market data event in the event queue with or without listeners
+        this.eventQueue.put(uuid,new MarketDepthEvent(
+                        this,new MarketDepth(reqId,position,marketMaker,operation,side,price,size)
+                )
+        );
+
+        // notify market depth listeners
+        this.notify(this.marketDepthListeners,new NotificationEvent(this,uuid));
+    }
+
+    public final class MarketDepthEvent extends Event<MarketDepth>                                                             {
+        public MarketDepthEvent(Object source, MarketDepth data) { super(source, data); }
+    }
+
+
+
+    @Override
+    public void contractDetails(int reqId, com.ib.client.ContractDetails contractDetails) {
+
+        // create a UUID for this event
+        final UUID uuid = java.util.UUID.randomUUID();
+
+        // put market data event in the event queue with or without listeners
+        this.eventQueue.put(uuid,new ContractDetailsEvent(
+                        this,new com.tws.ContractDetails(reqId,contractDetails)
+                )
+        );
+
+        // notify market depth listeners
+        this.notify(this.contractDetailsListeners,new NotificationEvent(this,uuid));
+    }
+
+    @Override
+    public void contractDetailsEnd(int reqId)                                             {
+        // no op
+    }
+
+    public final class ContractDetailsEvent extends Event<com.tws.ContractDetails>        {
+        public ContractDetailsEvent(Object source, com.tws.ContractDetails data) { super(source, data); }
     }
 
 

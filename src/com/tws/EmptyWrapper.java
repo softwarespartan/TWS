@@ -91,12 +91,12 @@ public class EmptyWrapper implements EWrapper {
     }
 
     @Override
-    public void contractDetails(int reqId, ContractDetails contractDetails) {
+    public void contractDetails(int reqId, com.ib.client.ContractDetails contractDetails) {
 
     }
 
     @Override
-    public void bondContractDetails(int reqId, ContractDetails contractDetails) {
+    public void bondContractDetails(int reqId, com.ib.client.ContractDetails contractDetails) {
 
     }
 
@@ -149,7 +149,7 @@ public class EmptyWrapper implements EWrapper {
     }
 
     @Override
-    public void scannerData(int reqId, int rank, ContractDetails contractDetails, String distance, String benchmark, String projection, String legsStr) {
+    public void scannerData(int reqId, int rank, com.ib.client.ContractDetails contractDetails, String distance, String benchmark, String projection, String legsStr) {
 
     }
 

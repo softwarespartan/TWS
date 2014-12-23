@@ -1,10 +1,10 @@
 package com.tws;
 
 /**
- * Associated with EWrapper:reqMktData
+ * Associated with EWrapper:reqMktDepth
  */
 
-public final class MarketDepthL2Update {
+public final class MarketDepth {
     public final int    reqId      ;
     public final int    position   ;
     public final String marketMaker;
@@ -14,7 +14,13 @@ public final class MarketDepthL2Update {
     public final int    size       ;
 
 
-    public MarketDepthL2Update(int reqId, int position, String marketMaker, int operation, int side, double price, int size) {
+    // EWrapper:updateMktDepth
+    public MarketDepth(int reqId, int position, int operation, int side, double price, int size) {
+        this(reqId,position,null,operation,side,price,size);
+    }
+
+    // EWrapper:updateMktDepthL2
+    public MarketDepth(int reqId, int position, String marketMaker, int operation, int side, double price, int size) {
         this.reqId       = reqId      ;
         this.position    = position   ;
         this.marketMaker = marketMaker;
@@ -35,3 +41,4 @@ public final class MarketDepthL2Update {
                 + this.size;
     }
 }
+
