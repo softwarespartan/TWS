@@ -126,6 +126,11 @@ public class MarketDepthAdv {
         @Override
         public void updateMktDepthL2(int tickerId, int position, String marketMaker, int operation, int side, double price, int size) {
 
+            String exchange = Integer.toString(tickerId);
+
+            if ( contractIdMap.containsKey(tickerId) ) exchange = (String) contractIdMap.get(tickerId);
+
+            System.out.println("updateMktDepthL2:  "+exchange+":"+marketMaker+" "+position+" "+operation+" "+side+" "+price+" "+size);
         }
 
         @Override
@@ -315,7 +320,7 @@ public class MarketDepthAdv {
         //if ( contractDetails.m_summary.m_symbol != null)
         //    System.out.println(com.ib.client.EWrapperMsgGenerator.contractDetails(0,contractDetails));
 
-        marketDepth.reqMarketDepth("SPY",5);
+        marketDepth.reqMarketDepth("FB",5);
 
         //marketDepth.executorService.shutdown();
 
