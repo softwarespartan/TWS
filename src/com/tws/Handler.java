@@ -1,8 +1,7 @@
 package com.tws;
 
-import com.ib.client.Contract;
+import com.ib.client.*;
 import com.ib.client.ContractDetails;
-import com.ib.client.TickType;
 
 import java.text.ParseException;
 import java.util.*;
@@ -14,7 +13,7 @@ public class Handler extends EmptyWrapper{
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
-    private final ConcurrentHashMap<UUID, TWSEvent> eventQueue = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<UUID, TWSEvent> eventQueue = new ConcurrentHashMap<>();
 
 
 
@@ -33,6 +32,9 @@ public class Handler extends EmptyWrapper{
     private final Set<NotificationListener> accountSummaryListeners
             = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
 
+    private final Set<NotificationListener> accountUpdateListeners
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+
     private final Set<NotificationListener> marketDataListeners
             = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
 
@@ -45,11 +47,17 @@ public class Handler extends EmptyWrapper{
     private final Set<NotificationListener> contractDetailsListeners
             = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
 
+    private final Set<NotificationListener> openOrderListeners
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+    private final Set<NotificationListener> orderStatusListeners
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+
 
 
     private final ConcurrentHashMap<Integer,HistoricalDataEvent> historicalDataMap = new ConcurrentHashMap<>();
 
-    private final ConcurrentHashMap<Integer,PositionsEvent>       positionMap      = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer,PositionsEvent>      positionMap       = new ConcurrentHashMap<>();
 
     private final ConcurrentHashMap<Integer,AccountSummaryEvent> accountSummaryMap = new ConcurrentHashMap<>();
 
@@ -103,6 +111,18 @@ public class Handler extends EmptyWrapper{
     public void removePositionListener       (NotificationListener listener) {
         System.out.println("realtime bar listener has been removed");
         this.positionListeners.remove(listener);
+    }
+
+
+
+    public void addAccountUpdateListener     (NotificationListener listener) {
+        System.out.println("account update listener has been added");
+        this.accountUpdateListeners.add(listener);
+    }
+
+    public void removeAccountUdateListener   (NotificationListener listener) {
+        System.out.println("account update listener has been removed");
+        this.accountUpdateListeners.remove(listener);
     }
 
 
@@ -163,6 +183,30 @@ public class Handler extends EmptyWrapper{
     public void removeContractDetailsListener(NotificationListener listener) {
         System.out.println("market depth listener has been removed");
         this.contractDetailsListeners.remove(listener);
+    }
+
+
+
+    public void addOpenOrderListener         (NotificationListener listener) {
+        System.out.println("open order listener has been added");
+        this.openOrderListeners.add(listener);
+    }
+
+    public void removeOpenOrderListener      (NotificationListener listener) {
+        System.out.println("open order listener has been removed");
+        this.openOrderListeners.remove(listener);
+    }
+
+
+
+    public void addOrderStatusListener       (NotificationListener listener) {
+        System.out.println("order status listener has been added");
+        this.orderStatusListeners.add(listener);
+    }
+
+    public void removeOrderStatusListener    (NotificationListener listener) {
+        System.out.println("order status listener has been removed");
+        this.orderStatusListeners.remove(listener);
     }
 
 
@@ -319,19 +363,19 @@ public class Handler extends EmptyWrapper{
 
 
     @Override
-    public void accountSummary(int reqId, String account, String tag, String value, String currency) {
+    public void accountSummary(int reqId, String account, String key, String value, String currency) {
 
         // box the request id for hashcode in map
         final Integer integerReqId = new Integer(reqId);
 
         // next check if there is an entry in the historical data map for this request id
         if (!this.accountSummaryMap.containsKey(integerReqId)){
-            this.accountSummaryMap.put(integerReqId, new AccountSummaryEvent( this,new HashMap<>()));
+            this.accountSummaryMap.put(integerReqId, new AccountSummaryEvent( this ));
             System.out.println("Initializing account summary mapping for reqId "+integerReqId);
         }
 
-        // add this position in the appropriate position event (i.e. build the event call by call)
-        this.accountSummaryMap.get(integerReqId).data.put(tag, value);
+        // add this position in the appropriate event (i.e. build the event call by call)
+        this.accountSummaryMap.get(integerReqId).data.add(new AccountAttribute(key,value,currency,account));
     }
 
     @Override
@@ -356,8 +400,31 @@ public class Handler extends EmptyWrapper{
         System.out.println("NotificationAction for account summary request has been submitted ...");
     }
 
-    public final class AccountSummaryEvent extends Event<HashMap<String,String>>                     {
-        public AccountSummaryEvent(Object obj, HashMap<String,String> details) { super(obj,details); }
+    public final class AccountSummaryEvent extends AggregateEvent<AccountAttribute>                  {
+        public AccountSummaryEvent(Object obj) { super(obj); }
+    }
+
+
+
+    @Override
+    public void updateAccountValue(String key, String value, String currency, String accountName) {
+
+        // create a UUID for this event
+        final UUID uuid = java.util.UUID.randomUUID();
+
+        // put market data event in the event queue with or without listeners
+        this.eventQueue.put( uuid,
+                new AccountUpdateEvent(
+                        this,new AccountAttribute(key,value,currency,accountName)
+                )
+        );
+
+        // notify market depth listeners
+        this.notify(this.accountUpdateListeners,new NotificationEvent(this,uuid));
+    }
+
+    public final class AccountUpdateEvent extends Event<AccountAttribute>                         {
+        public AccountUpdateEvent(Object source, AccountAttribute data) { super(source, data); }
     }
 
 
@@ -511,6 +578,52 @@ public class Handler extends EmptyWrapper{
 
     public final class ContractDetailsEvent extends Event<com.tws.ContractDetails>        {
         public ContractDetailsEvent(Object source, com.tws.ContractDetails data) { super(source, data); }
+    }
+
+
+
+    @Override
+    public void openOrder(int orderId, Contract contract, Order order, OrderState orderState){
+
+        // create a UUID for this event
+        final UUID uuid = java.util.UUID.randomUUID();
+
+        // put market data event in the event queue with or without listeners
+        this.eventQueue.put( uuid,
+                new OpenOrderEvent( this,
+                        new OpenOrder(orderId,contract,order,orderState)
+                )
+        );
+
+        // notify market depth listeners
+        this.notify(this.openOrderListeners,new NotificationEvent(this,uuid));
+    }
+
+    public final class OpenOrderEvent extends Event<OpenOrder>{
+        public OpenOrderEvent(Object source, OpenOrder data)  { super(source, data); }
+    }
+
+
+
+    @Override
+    public void orderStatus(int orderId, String status, int filled, int remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
+
+        // create a UUID for this event
+        final UUID uuid = java.util.UUID.randomUUID();
+
+        // put market data event in the event queue with or without listeners
+        this.eventQueue.put( uuid,
+                new OrderStatusEvent( this,
+                        new OrderStatus(orderId,status,filled,remaining,avgFillPrice,permId,parentId,lastFillPrice,clientId,whyHeld)
+                )
+        );
+
+        // notify market depth listeners
+        this.notify(this.orderStatusListeners,new NotificationEvent(this,uuid));
+    }
+
+    public final class OrderStatusEvent extends Event<OrderStatus>{
+        public OrderStatusEvent(Object source, OrderStatus data)  { super(source, data); }
     }
 
 
