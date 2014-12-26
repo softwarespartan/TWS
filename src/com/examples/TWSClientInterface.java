@@ -76,7 +76,7 @@ public class TWSClientInterface implements EWrapper{
 
     @Override
     public void nextValidId(int orderId) {
-
+        System.out.println("TWSClientInterface:nextValidId: "+orderId);
     }
 
     @Override
@@ -146,6 +146,7 @@ public class TWSClientInterface implements EWrapper{
                 + "evRule = "            + execution.m_evRule       + "\n"
                 + "evMultiplier = "      + execution.m_evMultiplier + "\n"
                 + " ---- Execution Details end ----\n";
+        System.out.println(msg);
     }
 
     @Override
