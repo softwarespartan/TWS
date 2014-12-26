@@ -3,7 +3,7 @@
 
 package com.ib.client;
 
-public class ScannerSubscription {
+public class    ScannerSubscription {
     public final static int NO_ROW_NUMBER_SPECIFIED = -1;
 
     private int m_numberOfRows = NO_ROW_NUMBER_SPECIFIED;

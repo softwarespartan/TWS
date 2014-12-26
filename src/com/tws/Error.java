@@ -33,7 +33,7 @@ public class Error {
     public String toString(){
 
         if (this.id != null && this.errorCode != null && this.errorMessage != null){
-            return this.id + " " + this.errorCode + this.errorMessage;
+            return this.id + " " + this.errorCode + " " + this.errorMessage;
         }
 
         else if (this.id == null && this.errorCode == null && this.errorMessage != null){

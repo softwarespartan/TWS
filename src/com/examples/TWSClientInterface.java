@@ -61,7 +61,7 @@ public class TWSClientInterface implements EWrapper{
 
     @Override
     public void updatePortfolio(Contract contract, int position, double marketPrice, double marketValue, double averageCost, double unrealizedPNL, double realizedPNL, String accountName) {
-
+        System.out.println("TWSClientInterface:updatePortfolio: "+accountName +" " + contract.m_symbol +" " +  position + " " + marketPrice + " " + marketValue + " " + averageCost + " " + unrealizedPNL + " " + realizedPNL);
     }
 
     @Override
@@ -202,17 +202,17 @@ public class TWSClientInterface implements EWrapper{
 
     @Override
     public void scannerParameters(String xml) {
-
+        System.out.println(xml);
     }
 
     @Override
     public void scannerData(int reqId, int rank, ContractDetails contractDetails, String distance, String benchmark, String projection, String legsStr) {
-
+        System.out.println(EWrapperMsgGenerator.scannerData(reqId,rank,contractDetails,distance,benchmark,projection,legsStr));
     }
 
     @Override
     public void scannerDataEnd(int reqId) {
-
+        System.out.println("TWSClientInterface:scannerDataEnd was called");
     }
 
     @Override

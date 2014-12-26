@@ -718,11 +718,12 @@ public class EReader extends Thread {
             }
 
             case SCANNER_DATA: {
-                ContractDetails contract = new ContractDetails();
+                //ContractDetails contract = new ContractDetails();
                 int version = readInt();
                 int tickerId = readInt();
                 int numberOfElements = readInt();
                 for (int ctr=0; ctr < numberOfElements; ctr++) {
+                    ContractDetails contract = new ContractDetails();
                     int rank = readInt();
                     if (version >= 3) {
                     	contract.m_summary.m_conId = readInt();

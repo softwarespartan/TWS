@@ -64,6 +64,9 @@ public class Handler extends EmptyWrapper{
     private final Set<NotificationListener> errorListeners
             = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
 
+    private final Set<NotificationListener> scannerDataListeners
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+
 
 
     private final ConcurrentHashMap<Integer,HistoricalDataEvent> historicalDataMap = new ConcurrentHashMap<>();
@@ -71,6 +74,8 @@ public class Handler extends EmptyWrapper{
     private final ConcurrentHashMap<Integer,PositionsEvent>      positionMap       = new ConcurrentHashMap<>();
 
     private final ConcurrentHashMap<Integer,AccountSummaryEvent> accountSummaryMap = new ConcurrentHashMap<>();
+
+    private final ConcurrentHashMap<Integer,ScannerDataEvent>    scannerDataMap    = new ConcurrentHashMap<>();
 
 
 
@@ -266,6 +271,18 @@ public class Handler extends EmptyWrapper{
 
 
 
+    public void addScannerDataListener       (NotificationListener listener) {
+        System.out.println("error listener has been added");
+        this.errorListeners.add(listener);
+    }
+
+    public void removeScannerDataListener    (NotificationListener listener) {
+        System.out.println("error listener has been removed");
+        this.errorListeners.remove(listener);
+    }
+
+
+
     public TWSEvent getEvent(UUID uuid){ return this.eventQueue.get(uuid); }
 
 
@@ -326,10 +343,13 @@ public class Handler extends EmptyWrapper{
     }
 
     public class AggregateEvent<T> extends java.util.EventObject implements com.tws.TWSEvent {
-        public final Set<T> data;
-        public final Date   date;
+        public final int    reqId;
+        public final Set<T> data ;
+        public final Date   date ;
 
-        AggregateEvent(Object obj){ super(obj); this.data = new HashSet<>(); this.date = new Date(); }
+        AggregateEvent(Object obj,int reqId){
+            super(obj); this.reqId = reqId;  this.data = new HashSet<>(); this.date = new Date();
+        }
     }
 
 
@@ -358,7 +378,7 @@ public class Handler extends EmptyWrapper{
 
         // next check if there is an entry in the historical data map for this request id
         if (!this.historicalDataMap.containsKey(integerReqId)){
-            this.historicalDataMap.put(integerReqId, new HistoricalDataEvent(this));
+            this.historicalDataMap.put(integerReqId, new HistoricalDataEvent(this,reqId));
         }
 
         // if we're finished then create event and notification
@@ -389,7 +409,7 @@ public class Handler extends EmptyWrapper{
     }
 
     public final class HistoricalDataEvent extends AggregateEvent<Bar> {
-        HistoricalDataEvent(Object obj) { super(obj); }
+        HistoricalDataEvent(Object obj,int reqId) { super(obj,reqId); }
     }
 
 
@@ -398,8 +418,9 @@ public class Handler extends EmptyWrapper{
     public void position(String account, Contract contract, int pos, double avgCost) {
 
         // next check if there is an entry in the historical data map for this request id
+        // NOTE:  for positions always set request id to 0 [yuk, i know].
         if (!this.positionMap.containsKey(0)){
-            this.positionMap.put(0, new PositionsEvent(this));
+            this.positionMap.put(0, new PositionsEvent(this,0));
         }
 
         // add this position in the appropriate position event (i.e. build the event call by call)
@@ -423,7 +444,7 @@ public class Handler extends EmptyWrapper{
     }
 
     public final class PositionsEvent extends AggregateEvent<Position>               {
-        PositionsEvent(Object obj) { super(obj); }
+        PositionsEvent(Object obj,int reqId) { super(obj,reqId); }
     }
 
 
@@ -433,7 +454,7 @@ public class Handler extends EmptyWrapper{
 
         // next check if there is an entry in the historical data map for this request id
         if (!this.accountSummaryMap.containsKey(reqId)){
-            this.accountSummaryMap.put(reqId, new AccountSummaryEvent(this));
+            this.accountSummaryMap.put(reqId, new AccountSummaryEvent(this,reqId));
         }
 
         // add this position in the appropriate event (i.e. build the event call by call)
@@ -454,7 +475,7 @@ public class Handler extends EmptyWrapper{
     }
 
     public final class AccountSummaryEvent extends AggregateEvent<AccountAttribute>                  {
-        public AccountSummaryEvent(Object obj) { super(obj); }
+        public AccountSummaryEvent(Object obj,int reqId) { super(obj,reqId); }
     }
 
 
@@ -651,6 +672,39 @@ public class Handler extends EmptyWrapper{
 
     public final class NextOrderIdEvent extends Event<NextOrderId> {
         public NextOrderIdEvent(Object source, NextOrderId data) { super(source, data); }
+    }
+
+
+
+    @Override
+    public void scannerData(int reqId, int rank, com.ib.client.ContractDetails contractDetails, String distance, String benchmark, String projection, String legsStr) {
+
+        Integer integerReqId = new Integer(reqId);
+
+        // next check if there is an entry in the historical data map for this request id
+        if (!this.scannerDataMap.containsKey(integerReqId)){
+            this.scannerDataMap.put(integerReqId, new ScannerDataEvent(this,reqId));
+        }
+
+        // add this position in the appropriate event (i.e. build the event call by call)
+        this.scannerDataMap.get(integerReqId).data.add(new ScannerData(rank,contractDetails,distance,benchmark,projection,legsStr));
+    }
+
+    @Override
+    public void scannerDataEnd(int reqId)                                  {
+
+        // extract the final aggregated event from the map
+        ScannerDataEvent event = this.scannerDataMap.get(reqId);
+
+        // remove from the event map
+        this.scannerDataMap.remove(reqId);
+
+        // process the event
+        this.processEvent( event, this.scannerDataListeners);
+    }
+
+    public final class ScannerDataEvent extends AggregateEvent<ScannerData>{
+        ScannerDataEvent(Object obj, int reqId) { super(obj, reqId); }
     }
 
 
