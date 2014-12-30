@@ -4,9 +4,7 @@ import com.ib.client.*;
 
 import java.text.ParseException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class Handler extends EmptyWrapper{
 
@@ -293,7 +291,11 @@ public class Handler extends EmptyWrapper{
         //this.executorService.submit( new NotificationAction( listeners,event ) );
 
         // route everything to notification listeners for now
-        this.executorService.submit( new NotificationAction( this.notificationListeners, event ) );
+        try {
+            this.executorService.submit(new NotificationAction(this.notificationListeners, event));
+        }catch(RejectedExecutionException e){
+            // no op (?)
+        }
     }
 
     private void processEvent(com.tws.TWSEvent event, Set<NotificationListener> listeners){
@@ -306,6 +308,32 @@ public class Handler extends EmptyWrapper{
 
         // notify market depth listeners
         this.notify(listeners,new NotificationEvent(this,uuid));
+    }
+
+    public void shutdown(){
+
+        // get the ball rolling
+        this.executorService.shutdown();
+
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!this.executorService.awaitTermination(2, TimeUnit.SECONDS)) {
+
+                // Cancel currently executing tasks
+                this.executorService.shutdownNow();
+
+                // Wait a while for tasks to respond to being cancelled
+                if (!this.executorService.awaitTermination(2, TimeUnit.SECONDS))
+                    System.err.println("handler executor service did not terminate");
+            }
+        } catch (InterruptedException ie) {
+
+            // (Re-)Cancel if current thread also interrupted
+            this.executorService.shutdownNow();
+
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
     }
 
 
@@ -687,7 +715,8 @@ public class Handler extends EmptyWrapper{
         }
 
         // add this position in the appropriate event (i.e. build the event call by call)
-        this.scannerDataMap.get(integerReqId).data.add(new ScannerData(rank,contractDetails,distance,benchmark,projection,legsStr));
+        this.scannerDataMap.get(integerReqId)
+                .data.add( new ScannerData(rank,contractDetails,distance,benchmark,projection,legsStr));
     }
 
     @Override
