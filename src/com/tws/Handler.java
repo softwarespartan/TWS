@@ -15,55 +15,55 @@ public class Handler extends EmptyWrapper{
 
 
     private final Set<NotificationListener> notificationListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> realTimeBarListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> historicalDataListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> positionListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> accountSummaryListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> accountUpdateListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> portfolioUpdateListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> marketDataListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> marketMetadataListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> marketDepthListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> contractDetailsListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> openOrderListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> orderStatusListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> executionDetailsListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> nextOrderIdListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> errorListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
     private final Set<NotificationListener> scannerDataListeners
-            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<>());
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
 
 
@@ -357,7 +357,14 @@ public class Handler extends EmptyWrapper{
 
         @Override
         public void run() {
+
+            /** Java 8
             this.listeners.stream().forEach(l -> l.TWSNotification(this.event));
+             */
+
+            for (NotificationListener l : this.listeners){
+                l.TWSNotification(this.event);
+            }
         }
     }
 

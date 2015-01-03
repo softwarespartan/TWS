@@ -24,6 +24,7 @@ public class ProxyBuilder {
 
         public Handler(Class classObj){
 
+            /** Java 8
             // generate list of methods implemented by this class
             Arrays.stream(classObj.getDeclaredMethods())
                     .forEach(m -> this.interfaceMethods.add(m.getName()));
@@ -31,10 +32,16 @@ public class ProxyBuilder {
             // comfort signal
             this.interfaceMethods.stream()
                     .forEach(m -> System.out.println("added interface method: " + m));
+             */
+
+            for (Method m:classObj.getDeclaredMethods()){
+                this.interfaceMethods.add(m.getName());
+                System.out.println("added interface method: " + m.getName());
+            }
         }
 
         @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        public Object invoke(Object proxy, Method method, final Object[] args) throws Throwable {
 
             // blab about what function was invoked
             //System.out.println("method invocation: "+method.toGenericString());
@@ -57,7 +64,7 @@ public class ProxyBuilder {
             }
 
             // retreieve the function to call in Matlab
-            String func = this.invocationMap.get(method.getName());
+            final String func = this.invocationMap.get(method.getName());
 
             // if the func is anonymous function then need to mod args
             if (func.startsWith("@")){
@@ -65,7 +72,7 @@ public class ProxyBuilder {
                 System.out.println("processing anonymous function: "+func);
 
                 // allocate new args with 1 extra argment
-                Object[] nargs = (numArgs > 0) ? (new Object[numArgs + 1]) : null;
+                final Object[] nargs = (numArgs > 0) ? (new Object[numArgs + 1]) : null;
 
                 if (numArgs > 0 ) {
 
@@ -86,18 +93,40 @@ public class ProxyBuilder {
                     //}
                 }
 
+                /** Java 8
                 Matlab.whenMatlabIdle(() -> {
                     try {
                         Matlab.mtFevalConsoleOutput("jeval",nargs,0);
                     }catch (Exception e){e.printStackTrace();}
                 });
+                 */
+
+                Matlab.whenMatlabIdle(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Matlab.mtFevalConsoleOutput("jeval",nargs,0);
+                        }catch (Exception e){e.printStackTrace();}
+                    }
+                });
 
             } else {
 
+                /** Java 8
                 Matlab.whenMatlabIdle(() -> {
                     try {
                         Matlab.mtFevalConsoleOutput(func, args, 0);
                     } catch (Exception e) { e.printStackTrace(); }
+                });
+                 */
+
+                Matlab.whenMatlabIdle(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Matlab.mtFevalConsoleOutput(func, args, 0);
+                        } catch (Exception e) { e.printStackTrace(); }
+                    }
                 });
             }
 
@@ -109,7 +138,7 @@ public class ProxyBuilder {
     public Object buildProxy(Class classObj){
         // make sure it is an interface
         if (!classObj.isInterface()){
-            System.out.println(classObj.toGenericString()+" is not an interface");
+            System.out.println(classObj+" is not an interface");
             return null;
         }
         return Proxy.newProxyInstance( classObj.getClassLoader(), new Class[]{classObj}, new Handler(classObj));

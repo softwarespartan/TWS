@@ -272,7 +272,16 @@ public class MarketDepthAdv {
 
         this.eClientSocket.reqContractDetails(0,contract);
 
+        /** Java 8
         ContractDetails contractDetails =  executorService.submit( () -> results.take() ).get();
+         */
+
+        ContractDetails contractDetails =  executorService.submit( new Callable<ContractDetails>() {
+            @Override
+            public ContractDetails call() throws Exception {
+                return results.take();
+            }
+        }).get();
 
         return contractDetails;
     }
