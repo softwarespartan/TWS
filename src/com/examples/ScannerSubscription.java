@@ -13,12 +13,17 @@ public class ScannerSubscription {
 
         com.ib.client.ScannerSubscription scannerSubscription = new com.ib.client.ScannerSubscription();
 
-        scannerSubscription.numberOfRows   (15              );
-        scannerSubscription.instrument     ("STK"          );
-        scannerSubscription.scanCode       ("TOP_PERC_GAIN");
-        scannerSubscription.locationCode   ("STK.ARCA" );
-        scannerSubscription.stockTypeFilter("CORP,ADR,ETF,CEF,REIT");
-        scannerSubscription.abovePrice(1);
+        scannerSubscription.numberOfRows   (15);
+        scannerSubscription.instrument("STK");
+        scannerSubscription.scanCode("MOST_ACTIVE");
+        //scannerSubscription.locationCode   ("STK.ARCA" );
+        scannerSubscription.locationCode   ("STK.US");
+        //scannerSubscription.stockTypeFilter("CORP,ADR,ETF,CEF,REIT");
+        scannerSubscription.abovePrice              (1);
+//        scannerSubscription.marketCapAbove          (0);
+//        scannerSubscription.couponRateAbove         (0);
+//        scannerSubscription.averageOptionVolumeAbove(0);
+//        scannerSubscription.aboveVolume             (0);
 
         eClientSocket.reqScannerSubscription(0,scannerSubscription,null);
         //eClientSocket.reqScannerParameters();

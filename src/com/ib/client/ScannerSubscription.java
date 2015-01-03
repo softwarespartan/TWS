@@ -10,11 +10,11 @@ public class    ScannerSubscription {
     private String m_instrument;
     private String m_locationCode;
     private String m_scanCode;
-    private double m_abovePrice = Double.MAX_VALUE;
+    private double m_abovePrice = 0;
     private double m_belowPrice = Double.MAX_VALUE;
-    private int m_aboveVolume = Integer.MAX_VALUE;
-    private int m_averageOptionVolumeAbove = Integer.MAX_VALUE;
-    private double m_marketCapAbove = Double.MAX_VALUE;
+    private int m_aboveVolume = 0;
+    private int m_averageOptionVolumeAbove = 0;
+    private double m_marketCapAbove = 0;
     private double m_marketCapBelow = Double.MAX_VALUE;
     private String m_moodyRatingAbove;
     private String m_moodyRatingBelow;
@@ -22,7 +22,7 @@ public class    ScannerSubscription {
     private String m_spRatingBelow;
     private String m_maturityDateAbove;
     private String m_maturityDateBelow;
-    private double m_couponRateAbove = Double.MAX_VALUE;
+    private double m_couponRateAbove = 0;
     private double m_couponRateBelow = Double.MAX_VALUE;
     private String m_excludeConvertible;
     private String m_scannerSettingPairs;

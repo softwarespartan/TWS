@@ -458,9 +458,6 @@ public class Handler extends EmptyWrapper{
     @Override
     public void positionEnd()                                                        {
 
-        // generate unique event id for this
-        final UUID uuid = UUID.randomUUID();
-
         // extract positions event from the map
         PositionsEvent positionsEvent = this.positionMap.get(0);
 
@@ -542,22 +539,42 @@ public class Handler extends EmptyWrapper{
 
     @Override
     public void tickPrice(int reqId, int field, double price, int canAutoExecute) {
-        this.processEvent(
-                new MarketDataEvent( this,
-                        new MarketData(reqId,TickType.getField(field),price)
-                ),
-                this.marketDataListeners
-        );
+
+        if (field < 10) {
+            this.processEvent(
+                    new MarketDataEvent(this,
+                            new MarketData(reqId, field, TickType.getField(field), price)
+                    ),
+                    this.marketDataListeners
+            );
+        } else {
+            this.processEvent(
+                    new MarketMetadataEvent(this,
+                            new MarketMetadata(reqId, field, TickType.getField(field), Double.toString(price))
+                    ),
+                    this.marketMetadataListeners
+            );
+        }
     }
 
     @Override
     public void tickSize(int reqId, int field, int size)                          {
-        this.processEvent(
-                new MarketDataEvent( this,
-                        new MarketData(reqId,TickType.getField(field),size)
-                ),
-                this.marketDataListeners
-        );
+
+        if (field < 10) {
+            this.processEvent(
+                    new MarketDataEvent(this,
+                            new MarketData(reqId, field, TickType.getField(field), size)
+                    ),
+                    this.marketDataListeners
+            );
+        } else {
+            this.processEvent(
+                    new MarketMetadataEvent(this,
+                            new MarketMetadata(reqId, field, TickType.getField(field), Integer.toString(size))
+                    ),
+                    this.marketMetadataListeners
+            );
+        }
     }
 
     public final class MarketDataEvent extends Event<MarketData>                  {
@@ -570,7 +587,7 @@ public class Handler extends EmptyWrapper{
     public void tickGeneric(int reqId, int tickType, double value)      {
         this.processEvent(
                 new MarketMetadataEvent(
-                        this,new MarketMetadata(reqId,TickType.getField(tickType),Double.toString(value))
+                        this,new MarketMetadata(reqId,tickType,TickType.getField(tickType),Double.toString(value))
                 ),
                 this.marketMetadataListeners
         );
@@ -580,7 +597,7 @@ public class Handler extends EmptyWrapper{
     public void tickString(int reqId, int tickType, String value)       {
         this.processEvent(
                 new MarketMetadataEvent(
-                        this,new MarketMetadata(reqId,TickType.getField(tickType),value)
+                        this,new MarketMetadata(reqId,tickType,TickType.getField(tickType),value)
                 ),
                 this.marketMetadataListeners
         );

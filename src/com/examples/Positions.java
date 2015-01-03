@@ -7,7 +7,7 @@ public class Positions {
     public static void main(String[] args){
 
         // create connection object for to communicate with TWS
-        EClientSocket eClientSocket = new EClientSocket(new EmptyWrapper());
+        EClientSocket eClientSocket = new EClientSocket(new TWSClientInterface());
 
         // try to connect to TWS
         eClientSocket.eConnect("127.0.0.1", 7496, 0);
