@@ -16,12 +16,12 @@ public class ScannerData {
     public final String                        legsStr        ;
 
     public ScannerData(
-                       int             rank           ,
+                       int                           rank           ,
                        com.ib.client.ContractDetails contractDetails,
-                       String          distance       ,
-                       String          benchmark      ,
-                       String          projection     ,
-                       String          legsStr
+                       String                        distance       ,
+                       String                        benchmark      ,
+                       String                        projection     ,
+                       String                        legsStr
     ) {
         this.rank            = rank           ;
         this.contractDetails = contractDetails;
