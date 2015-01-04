@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="com.mathworks.jmi">
+    <CLASSES>
+      <root url="jar:///Applications/MATLAB_R2014b.app/java/jar/jmi.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
