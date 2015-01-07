@@ -1,7 +1,5 @@
 package com.tws;
 
-import com.ib.client.ContractDetails;
-
 /**
  * Associated with EWrapper:scannerData
  */
