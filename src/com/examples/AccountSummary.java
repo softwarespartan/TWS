@@ -2,6 +2,7 @@ package com.examples;
 
 import com.ib.client.EClientSocket;
 import com.ib.controller.AccountSummaryTag;
+import com.ib.controller.Types;
 import com.tws.EmptyWrapper;
 
 public class AccountSummary {
@@ -24,5 +25,7 @@ public class AccountSummary {
 
         // request account summary
         eClientSocket.reqAccountSummary(0, "All", attrStr.toString());
+
+
     }
 }

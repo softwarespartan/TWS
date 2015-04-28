@@ -65,15 +65,20 @@ public class Handler extends EmptyWrapper{
     private final Set<NotificationListener> scannerDataListeners
             = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
+    private final Set<NotificationListener> optionComputationListeners
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
 
-    private final ConcurrentHashMap<Integer,HistoricalDataEvent> historicalDataMap = new ConcurrentHashMap<>();
 
-    private final ConcurrentHashMap<Integer,PositionsEvent>      positionMap       = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer,HistoricalDataEvent>  historicalDataMap = new ConcurrentHashMap<>();
 
-    private final ConcurrentHashMap<Integer,AccountSummaryEvent> accountSummaryMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer,PositionsEvent>       positionMap       = new ConcurrentHashMap<>();
 
-    private final ConcurrentHashMap<Integer,ScannerDataEvent>    scannerDataMap    = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer,AccountSummaryEvent>  accountSummaryMap = new ConcurrentHashMap<>();
+
+    private final ConcurrentHashMap<Integer,ScannerDataEvent>     scannerDataMap    = new ConcurrentHashMap<>();
+
+    private final ConcurrentHashMap<Integer,ContractDetailsEvent> contracDetailsMap = new ConcurrentHashMap<>();
 
 
 
@@ -281,6 +286,18 @@ public class Handler extends EmptyWrapper{
 
 
 
+    public void addOptionComputationListener       (NotificationListener listener) {
+        System.out.println("option computation listener has been added");
+        this.optionComputationListeners.add(listener);
+    }
+
+    public void removeOptionComputationListener    (NotificationListener listener) {
+        System.out.println("option computation listener has been removed");
+        this.optionComputationListeners.remove(listener);
+    }
+
+
+
     public TWSEvent getEvent(UUID uuid){ return this.eventQueue.get(uuid); }
 
 
@@ -409,7 +426,7 @@ public class Handler extends EmptyWrapper{
     public void historicalData(int reqId, String date, double open, double high, double low, double close, int volume, int count, double wap, boolean hasGaps) {
 
         // box the request id for hashcode in map
-        final Integer integerReqId = new Integer(reqId);
+        final Integer integerReqId = reqId;
 
         // next check if there is an entry in the historical data map for this request id
         if (!this.historicalDataMap.containsKey(integerReqId)){
@@ -645,21 +662,34 @@ public class Handler extends EmptyWrapper{
 
     @Override
     public void contractDetails(int reqId, com.ib.client.ContractDetails contractDetails) {
-        this.processEvent(
-                new ContractDetailsEvent(
-                        this,new com.tws.ContractDetails(reqId,contractDetails)
-                ),
-                this.contractDetailsListeners
-        );
+
+        Integer integerReqId = reqId;
+
+        // next check if there is an entry in the historical data map for this request id
+        if (!this.contracDetailsMap.containsKey(integerReqId)){
+            this.contracDetailsMap.put(integerReqId, new ContractDetailsEvent(this, reqId));
+        }
+
+        // add this position in the appropriate event (i.e. build the event call by call)
+        this.contracDetailsMap.get(integerReqId)
+                .data.add(new ContractDetails(reqId, contractDetails));
     }
 
     @Override
     public void contractDetailsEnd(int reqId)                                             {
-        // no op
+
+        // extract the final aggregated event from the map
+        ContractDetailsEvent event = this.contracDetailsMap.get(reqId);
+
+        // remove from the event map
+        this.contracDetailsMap.remove(reqId);
+
+        // process the event
+        this.processEvent( event, this.contractDetailsListeners);
     }
 
-    public final class ContractDetailsEvent extends Event<com.tws.ContractDetails>        {
-        public ContractDetailsEvent(Object source, com.tws.ContractDetails data) { super(source, data); }
+    public final class ContractDetailsEvent extends AggregateEvent<ContractDetails>        {
+        public ContractDetailsEvent(Object source, int reqId) { super(source, reqId); }
     }
 
 
@@ -731,7 +761,7 @@ public class Handler extends EmptyWrapper{
     @Override
     public void scannerData(int reqId, int rank, com.ib.client.ContractDetails contractDetails, String distance, String benchmark, String projection, String legsStr) {
 
-        Integer integerReqId = new Integer(reqId);
+        Integer integerReqId = reqId;
 
         // next check if there is an entry in the historical data map for this request id
         if (!this.scannerDataMap.containsKey(integerReqId)){
@@ -758,6 +788,22 @@ public class Handler extends EmptyWrapper{
 
     public final class ScannerDataEvent extends AggregateEvent<ScannerData>{
         ScannerDataEvent(Object obj, int reqId) { super(obj, reqId); }
+    }
+
+
+
+    @Override
+    public void tickOptionComputation(int tickerId, int field, double impliedVol, double delta, double optPrice, double pvDividend, double gamma, double vega, double theta, double undPrice) {
+        this.processEvent(
+                new OptionComputationEvent( this,
+                        new OptionComputation(tickerId,field,impliedVol,delta,optPrice,pvDividend,gamma,vega,theta,undPrice)
+                ),
+                this.optionComputationListeners
+        );
+    }
+
+    public final class OptionComputationEvent extends Event<OptionComputation>{
+        public OptionComputationEvent(Object source, OptionComputation data) { super(source, data); }
     }
 
 
