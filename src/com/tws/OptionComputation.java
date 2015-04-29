@@ -4,8 +4,8 @@ import com.ib.client.EWrapperMsgGenerator;
 
 public class OptionComputation {
 
-    public final int    tickerId   ;
-    public final int    field      ;
+    public final int    reqId      ;
+    public final int    tickType   ;
     public final double impliedVol ;
     public final double delta      ;
     public final double optPrice   ;
@@ -16,8 +16,8 @@ public class OptionComputation {
     public final double undPrice   ;
 
     public OptionComputation(
-            int    tickerId   ,
-            int    field      ,
+            int    reqId      ,
+            int    tickType   ,
             double impliedVol ,
             double delta      ,
             double optPrice   ,
@@ -27,8 +27,8 @@ public class OptionComputation {
             double theta      ,
             double undPrice
     ) {
-        this.tickerId   = tickerId   ;
-        this.field      = field      ;
+        this.reqId      = reqId      ;
+        this.tickType   = tickType   ;
         this.impliedVol = impliedVol ;
         this.delta      = delta      ;
         this.optPrice   = optPrice   ;
@@ -42,8 +42,8 @@ public class OptionComputation {
     @Override
     public String toString(){
         return EWrapperMsgGenerator.tickOptionComputation(
-                this.tickerId   ,
-                this.field      ,
+                this.reqId      ,
+                this.tickType   ,
                 this.impliedVol ,
                 this.delta      ,
                 this.optPrice   ,
