@@ -68,6 +68,9 @@ public class Handler extends EmptyWrapper{
     private final Set<NotificationListener> optionComputationListeners
             = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
 
+    private final Set<NotificationListener> EFPListeners
+            = java.util.Collections.newSetFromMap(new ConcurrentHashMap<NotificationListener,Boolean>());
+
 
 
     private final ConcurrentHashMap<Integer,HistoricalDataEvent>  historicalDataMap = new ConcurrentHashMap<>();
@@ -78,7 +81,7 @@ public class Handler extends EmptyWrapper{
 
     private final ConcurrentHashMap<Integer,ScannerDataEvent>     scannerDataMap    = new ConcurrentHashMap<>();
 
-    private final ConcurrentHashMap<Integer,ContractDetailsEvent> contracDetailsMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer,ContractDetailsEvent> contractDetailsMap = new ConcurrentHashMap<>();
 
 
 
@@ -286,14 +289,26 @@ public class Handler extends EmptyWrapper{
 
 
 
-    public void addOptionComputationListener       (NotificationListener listener) {
+    public void addOptionComputationListener    (NotificationListener listener) {
         System.out.println("option computation listener has been added");
         this.optionComputationListeners.add(listener);
     }
 
-    public void removeOptionComputationListener    (NotificationListener listener) {
+    public void removeOptionComputationListener (NotificationListener listener) {
         System.out.println("option computation listener has been removed");
         this.optionComputationListeners.remove(listener);
+    }
+
+
+
+    public void addEFPListener       (NotificationListener listener) {
+        System.out.println("option computation listener has been added");
+        this.EFPListeners.add(listener);
+    }
+
+    public void removeEFPListener    (NotificationListener listener) {
+        System.out.println("option computation listener has been removed");
+        this.EFPListeners.remove(listener);
     }
 
 
@@ -666,12 +681,12 @@ public class Handler extends EmptyWrapper{
         Integer integerReqId = reqId;
 
         // next check if there is an entry in the historical data map for this request id
-        if (!this.contracDetailsMap.containsKey(integerReqId)){
-            this.contracDetailsMap.put(integerReqId, new ContractDetailsEvent(this, reqId));
+        if (!this.contractDetailsMap.containsKey(integerReqId)){
+            this.contractDetailsMap.put(integerReqId, new ContractDetailsEvent(this, reqId));
         }
 
         // add this position in the appropriate event (i.e. build the event call by call)
-        this.contracDetailsMap.get(integerReqId)
+        this.contractDetailsMap.get(integerReqId)
                 .data.add(new ContractDetails(reqId, contractDetails));
     }
 
@@ -679,10 +694,10 @@ public class Handler extends EmptyWrapper{
     public void contractDetailsEnd(int reqId)                                             {
 
         // extract the final aggregated event from the map
-        ContractDetailsEvent event = this.contracDetailsMap.get(reqId);
+        ContractDetailsEvent event = this.contractDetailsMap.get(reqId);
 
         // remove from the event map
-        this.contracDetailsMap.remove(reqId);
+        this.contractDetailsMap.remove(reqId);
 
         // process the event
         this.processEvent( event, this.contractDetailsListeners);
@@ -804,6 +819,21 @@ public class Handler extends EmptyWrapper{
 
     public final class OptionComputationEvent extends Event<OptionComputation>{
         public OptionComputationEvent(Object source, OptionComputation data) { super(source, data); }
+    }
+
+
+    @Override
+    public void tickEFP(int tickerId, int tickType, double basisPoints, String formattedBasisPoints, double impliedFuture, int holdDays, String futureExpiry, double dividendImpact, double dividendsToExpiry) {
+        this.processEvent(
+                new EFPEvent( this,
+                        new EFP(tickerId,tickType,basisPoints,formattedBasisPoints,impliedFuture,holdDays,futureExpiry,dividendImpact,dividendsToExpiry)
+                ),
+                this.EFPListeners
+        );
+    }
+
+    public final class EFPEvent extends Event<EFP>{
+        public EFPEvent(Object source, EFP data) { super(source, data); }
     }
 
 
