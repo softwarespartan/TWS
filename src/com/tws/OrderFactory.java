@@ -36,10 +36,38 @@ public class OrderFactory {
         return order;
     }
 
+    public static Order GenericMarketOrder(String account, String action, int quantity){
+
+        // init new order
+        Order order = new Order();
+
+        // set the order type to limit
+        order.m_orderType = "MKT";
+
+        // set the account id
+        order.m_account = account;
+
+        // set the order type
+        switch (action.toUpperCase()){
+            case "BUY" : order.m_action = "BUY" ; break;
+            case "SELL": order.m_action = "SELL"; break;
+            default:
+                System.out.println("invalid order action: "+action);
+                order.m_action = "";
+        }
+
+        // set the number of shares
+        order.m_totalQuantity = quantity;
+
+        // that's it ..
+        return order;
+    }
+
     public static void main(String[] args){
 
-        Order order = OrderFactory.GenericLimitOrder("DU207406","BUY",100,200.2);
+        Order limitOrder  = OrderFactory.GenericLimitOrder ("DU207406", "BUY", 100, 200.2);
+        Order marketOrder = OrderFactory.GenericMarketOrder("DU207406", "BUY", 100       );
 
-        System.out.println(order.m_account+" "+order.m_orderType+" "+order.m_action+" "+order.m_totalQuantity+" "+order.m_lmtPrice);
+        System.out.println(limitOrder.m_account+" "+limitOrder.m_orderType+" "+limitOrder.m_action+" "+limitOrder.m_totalQuantity+" "+limitOrder.m_lmtPrice);
     }
 }
